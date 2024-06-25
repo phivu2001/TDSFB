@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfAccount xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Account>
+    <Name>Linh Nguyễn</Name>
+    <Idacc>100093531398711</Idacc>
+    <Accesstocken>TDSQfiIjclZXZzJiOiIXZ2V2ciwiIwMjM4YnbhVHeiojIyV2c1Jye</Accesstocken>
+    <Cookie>sb=nrtRZvkZ95mzHlxJy9sEkPh1; datr=nrtRZreW6yP0EoP61yJWLaQS; dpr=1.25; c_user=100093531398711; xs=48%3AYrDpLryvI7fwnA%3A2%3A1716632492%3A-1%3A7207%3A%3AAcVBzzdZw-eEmUoE983qYVxitH4E0WoeAIDnPUkuWQ; fr=1cBWiWjWKGy19a2oP.AWVw5puzi_dG0GEIYKwrnmnGuMU.BmUveC..AAA.0.0.BmUveC.AWVydpUfY_Y; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1716713372781%2C%22v%22%3A1%7D; wd=982x730</Cookie>
+  </Account>
+  <Account>
+    <Name>Hồ Hùng Long</Name>
+    <Idacc>100092373849571</Idacc>
+    <Accesstocken>TDS0nI0IXZ2V2ciojIyVmdlNnIsICMxkDMphGciojIyV2c1Jye</Accesstocken>
+    <Cookie>datr=zC5rZtRV3OIRNsogb7_k39bJ; sb=zC5rZuS41jcWNe2LXFaTU6dm; ps_n=1; ps_l=1; c_user=100092373849571; xs=21%3AMSvBRL4HeXYzCQ%3A2%3A1718300464%3A-1%3A6479%3A%3AAcWy7NcTFbbM0Ydw-dH90-yya_h1hxbigFGtVDz_pA; fr=1JcNQqb8pagQLherw.AWUBB6XZ_iIM0thoG2vGIRmODPo.Bmd5ZD..AAA.0.0.Bmd5ZD.AWUIE_PAoLo; dpr=1.25; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1719113285052%2C%22v%22%3A1%7D; wd=982x738</Cookie>
+  </Account>
+  <Account>
+    <Name>Phạm Nga</Name>
+    <Idacc>100084638886287</Idacc>
+    <Accesstocken>TDSQfiUjclZXZzJiOiIXZ2V2ciwiIzAzbtdmbvhGciojIyV2c1Jye</Accesstocken>
+    <Cookie>datr=TilrZreI8HASW85pLHUe_0i1; sb=TilrZowqIiU7BHZCyGWuEd2_; ps_n=1; ps_l=1; c_user=100084638886287; xs=50%3AAN9A11U4o8KZtA%3A2%3A1718299057%3A-1%3A10299%3A%3AAcWqnAai_EYUH8gcjPgUCp633HzJhvDSR0PUXMBFfQ; fr=1yeqHqCbZk1l7p9rq.AWVcDEUjhcBzeMRJTNUxFB0WLVg.Bmd5hR..AAA.0.0.Bmd5hR.AWUfJ0h37DM; dpr=1.25; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1719113816393%2C%22v%22%3A1%7D; wd=982x738</Cookie>
+  </Account>
+  <Account>
+    <Name>Hai Nguyễn</Name>
+    <Idacc>100066127825650</Idacc>
+    <Accesstocken>TDS0nIwEjclZXZzJiOiIXZ2V2ciwiI0AzbtdmbvhGciojIyV2c1Jye</Accesstocken>
+    <Cookie>datr=0ylrZu0_ONx8a3WDjz7Ua7xM; sb=0ylrZgM1Xrou_dReCUGk_HkV; c_user=100066127825650; xs=20%3AL0i4Pcs0CUfmiw%3A2%3A1718299125%3A-1%3A10363%3A%3AAcXrsCG5zqE5WcZfg3RP9mIxF9ysUDlZloLqixwZ5w; fr=11vZkhAW7DeHx3rcn.AWU9yk4gSbr3Ex8rR6sYsSB9ego.Bmd5mD..AAA.0.0.Bmd5mD.AWVdUuS1vcg; dpr=1.25; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1719114121783%2C%22v%22%3A1%7D; wd=982x738</Cookie>
+  </Account>
+  <Account>
+    <Name>Gia Long Phạm</Name>
+    <Idacc>100022067562230</Idacc>
+    <Cookie>datr=DiprZkTTPxLHVNl8Pl41NNRm; sb=DiprZjsTUSjkY0eGEbVoy03y; c_user=100022067562230; ps_n=1; ps_l=1; xs=17%3AVwGHZxfJNDCupg%3A2%3A1718299180%3A-1%3A10290%3A%3AAcXhrapoIWxpiZdEzRkehhsUXXuGZuBXapeVS1J-8w; fr=1ja4jXTtFwE6evPZf.AWU8oEID0TjSrEbG7_Hl_8blPws.Bmd5oH..AAA.0.0.Bmd5oH.AWUabLcXek4; dpr=1.25; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1719114263421%2C%22v%22%3A1%7D; wd=982x738</Cookie>
+    <Accesstocken>TDS0nIwEjclZXZzJiOiIXZ2V2ciwiI0AzbtdmbvhGciojIyV2c1Jye</Accesstocken>
+  </Account>
+</ArrayOfAccount>
