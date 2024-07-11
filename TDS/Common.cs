@@ -10,22 +10,22 @@ namespace TDS
 {
     public static class Common
     {
-       public static List<string> lstSocial = new List<string>() { "Facebook", "Tiktok", "Intagram" };
-       public static List<string> lstFieldsFacebook = new List<string>() { "follow", "like", "likegiare", "likesieure", "reaction", "comment", "share", "reactcmt", "group", "page" };
-       public static List<string> lstFieldsTiktok = new List<string>() { "tiktok_like", "tiktok_follo", "tiktok_comment" };
-       public static List<string> lstFieldsIntagram = new List<string>() { "instagram_like", "instagram_follow", "instagram_comment" };
+        public static List<string> lstSocial = new List<string>() { "Facebook", "Tiktok", "Intagram" };
+        public static List<string> lstFieldsFacebook = new List<string>() { "follow", "like", "likegiare", "likesieure", "reaction", "comment", "share", "reactcmt", "group", "page" };
+        public static List<string> lstFieldsTiktok = new List<string>() { "tiktok_like", "tiktok_follo", "tiktok_comment" };
+        public static List<string> lstFieldsIntagram = new List<string>() { "instagram_like", "instagram_follow", "instagram_comment" };
     }
     public enum eSocial : int
     {
         Facebook = 0,
         Tiktok = 1,
-        Intagram =2
+        Intagram = 2
     }
     public class Account
-    {   
-        public string Name { get; set; }
+    {
+        public string NameAcc { get; set; }
         public string Idacc { get; set; }
-        public string Accesstocken { get; set; }
+        public string AccessToken { get; set; }
         public string Cookie { get; set; }
     }
 

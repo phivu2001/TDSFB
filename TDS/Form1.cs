@@ -8,6 +8,7 @@ using SeleniumUndetectedChromeDriver;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
@@ -19,7 +20,6 @@ namespace TDS
 {
     public partial class Form1 : Form
     {
-        private bool isSetConfig = false;
         private Common1 Common1 = new Common1();
         public eSocial eSocial;
         private TiktokService tiktokService;
@@ -52,89 +52,86 @@ namespace TDS
             options.AddArgument("--disable-dev-shm-usage");
             options.AddArgument("--disable-blink-features=AutomationControlled");
 
-            // Hide traces of Selenium
+            // Ẩn dấu vết của Selenium
             options.AddExcludedArgument("enable-automation");
             options.AddAdditionalOption("useAutomationExtension", false);
 
             string cookie = dgvMain.Rows[indexRow].Cells["CookieFacebook"].FormattedValue.ToString();
             var cookies = Common1.setCookie(cookie);
-            var driver = new ChromeDriver(options);
-            try
+            using (var driver = new ChromeDriver(options)) // Sử dụng 'using' để tự động quản lý tài nguyên
             {
-                await Task.Run(() =>
+                try
                 {
                     driver.Navigate().GoToUrl("https://www.facebook.com");
                     cookies.ForEach(x => driver.Manage().Cookies.AddCookie(new OpenQA.Selenium.Cookie(x.key, x.value)));
                     driver.Navigate().GoToUrl("https://www.facebook.com");
-                });
 
-                // Call API
-                string idfb = dgvMain.Rows[indexRow].Cells["IDAcc"].FormattedValue.ToString();
-                string TDS_token = dgvMain.Rows[indexRow].Cells["Accesstoken"].FormattedValue.ToString();
+                    // Gọi API
+                    string idfb = dgvMain.Rows[indexRow].Cells["IDAcc"].FormattedValue.ToString();
+                    string TDS_token = dgvMain.Rows[indexRow].Cells["Accesstoken"].FormattedValue.ToString();
 
-                await SetConfig(idfb, TDS_token, indexRow);
-                await GetMission("like", TDS_token, driver, indexRow);
-            }
-            finally
-            {
-                driver.Quit();
+                    await SetConfig(idfb, TDS_token, indexRow).ConfigureAwait(false);
+                    await GetMission("like", TDS_token, driver, indexRow).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Có lỗi xảy ra: {ex.Message}", "Lỗi");
+                }
             }
         }
 
+
         private async Task SetConfig(string idfb, string TDS_token, int index)
         {
-            await Task.Run(async () =>
+            string url = $"https://traodoisub.com/api/?fields=run&id={idfb}&access_token={TDS_token}";
+            try
             {
-                string url = $"https://traodoisub.com/api/?fields=run&id={idfb}&access_token={TDS_token}";
-                try
+                using (HttpClient client = new HttpClient())
                 {
-                    using (HttpClient client = new HttpClient())
-                    {
-                        HttpResponseMessage response = await client.GetAsync(url);
-                        response.EnsureSuccessStatusCode();
-                        string responseBody = await response.Content.ReadAsStringAsync();
-                        var apiResponse = JsonConvert.DeserializeObject<ApiResponseConfig>(responseBody);
+                    HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
+                    response.EnsureSuccessStatusCode();
+                    string responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var apiResponse = JsonConvert.DeserializeObject<ApiResponseConfig>(responseBody);
 
-                        AddToResultList(apiResponse.data.msg, index);
-                        isSetConfig = true;
-                    }
+                    AddToResultList(apiResponse.data.msg, index);
                 }
-                catch (HttpRequestException ex)
-                {
-                    MessageBox.Show($"Lỗi yêu cầu: {ex.Message}", "Lỗi");
-                }
-            });
+            }
+            catch (HttpRequestException ex)
+            {
+                MessageBox.Show($"Lỗi yêu cầu: {ex.Message}", "Lỗi");
+            }
         }
 
         private void AddToResultList(string message, int index, string totalCoin = "")
         {
-            Task.Run(() =>
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => AddToResultList(message, index, totalCoin)));
+                return;
+            }
+
+            lock (listViewArray) // Sử dụng lock để đảm bảo an toàn với luồng
             {
                 if (listViewArray.Length <= index)
                 {
-                    MessageBox.Show("Index must be between 1 and 12.");
+                    MessageBox.Show("Index phải nằm trong khoảng từ 1 đến 12.");
                     return;
                 }
-                if (this.InvokeRequired)
+
+                System.Windows.Forms.ListView targetListView = listViewArray[index];
+                System.Windows.Forms.TextBox targetTextbox = textBoxArray[index];
+                if (totalCoin != "")
                 {
-                    this.Invoke(new Action(() => AddToResultList(message, index, totalCoin)));
-                    return;
+                    targetTextbox.Text = totalCoin;
                 }
+                targetListView.Items.Add(new ListViewItem(message));
+                if (targetListView.Items.Count > 0)
                 {
-                    System.Windows.Forms.ListView targetListView = listViewArray[index];
-                    System.Windows.Forms.TextBox targetTextbox = textBoxArray[index];
-                    if (totalCoin != "")
-                    {
-                        targetTextbox.Text = totalCoin;
-                    }
-                    targetListView.Items.Add(new ListViewItem(message));
-                    if (targetListView.Items.Count > 0)
-                    {
-                        targetListView.EnsureVisible(targetListView.Items.Count - 1);
-                    }
+                    targetListView.EnsureVisible(targetListView.Items.Count - 1);
                 }
-            });
+            }
         }
+
 
         private async Task GetMission(string type, string TDS_token, ChromeDriver driver, int indexRow)
         {
@@ -175,7 +172,7 @@ namespace TDS
                             try
                             {
                                 IWebElement likeButton = null;
-                                var waitPage1 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+                                var waitPage1 = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
                                 if (currentUrl.Contains("reel"))
                                 {
                                     likeButton = waitPage1.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//div[@aria-label='Thích' and @role='button']")));
@@ -184,12 +181,12 @@ namespace TDS
                                 {
                                     likeButton = waitPage1.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//span[text()='Thích']")));
                                 }
-                                likeButton?.Click();
+                                likeButton.Click();
 
                                 await Task.Delay(2000);
 
                                 string idMission = item.id;
-                                await GetCoin(type, idMission, TDS_token, driver, index, indexRow);
+                                GetCoin(type, idMission, TDS_token, driver, index, indexRow);
 
                                 await Task.Delay(20000);
                             }
@@ -229,9 +226,9 @@ namespace TDS
         }
 
 
-        private async Task GetCoin(string type, string id_job, string TDS_token, ChromeDriver driver, int index, int indexRow)
+        private void GetCoin(string type, string id_job, string TDS_token, ChromeDriver driver, int index, int indexRow)
         {
-            await Task.Run(async () =>
+            Task.Run(async () =>
             {
                 string url = $"https://traodoisub.com/api/coin/?type={type}&id={id_job}&access_token={TDS_token}";
                 try
@@ -337,24 +334,13 @@ namespace TDS
             //    lstResult.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             //}
         }
-        private async void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex != -1 && e.RowIndex != -1)
             {
                 if (dgvMain.Columns[e.ColumnIndex] is DataGridViewButtonColumn)
                 {
-                    await Task.Run(async () =>
-                    {
-                        await testChromeFacebook(e.RowIndex);
-                    });
-                    //await Task.Run(async () =>
-                    //{
-                    //    string test = "_ttp=2dBGrxO2A50Di16PsxcrSO2WDuz; tt_chain_token=vfxns2MfkehDu0D79R8llw==; passport_csrf_token=334a4a4d0cd24ca0e5f3c726419a1280; passport_csrf_token_default=334a4a4d0cd24ca0e5f3c726419a1280; store-country-code-src=uid; tt_csrf_token=iJwWQdeI-WqznQZQGCLaNDbU3lY7Yue4aX0w; ak_bmsc=DFC4D6AD52C29920043191938AC5E2FF~000000000000000000000000000000~YAAQNPrSFyzkFpmPAQAAViIloBevYj2VhaUWFFp26xb4GKIX0346z9IRbwlDyCY06cdHZwd+wjgG/PzFB3nNkcibbqNUho/LkfD+4FbPiZBQlQQJFkvDMamVEj1S5ft8JWyF7JmbKrIDZX1kXjdwChAN4OTuY6GAxGHZj2WbuOxneRvAhy63v7ss28xTX12UctRCOCc8Si0UFKMbC1rKxl0cM64f7jV+s7SVAj8yfN9NEijZ6EP+OVksXyQ5cpMV6K/AnJTpl8xPdet+GSjYuUHyTejL3TQeimR6PKVv+34a4Hy8BjBlxz8jBmFXKeBgz3arlLUoOv6JZma+cQZO3JMA7iK9Nvr1KNtGCvaag0ulEfFoeTNRPNOOyKtcyW5h3zCtQqgbzYL0W0w=; s_v_web_id=verify_lwhrlnzy_ZiaMyNsC_QTtJ_49Va_9t3K_M4MjHqiOaann; multi_sids=7259568914643436549%3A69d21a44a31cd5b1dc976076d81e704a; cmpl_token=AgQQAPOFF-RO0rSBxdCD-J08_HM_y5nW_5MOYNfnnA; passport_auth_status=98c1c84e1f8f3f67b5d7818e57c940a5%2C; passport_auth_status_ss=98c1c84e1f8f3f67b5d7818e57c940a5%2C; sid_guard=69d21a44a31cd5b1dc976076d81e704a%7C1716378768%7C15551999%7CMon%2C+18-Nov-2024+11%3A52%3A47+GMT; uid_tt=dbf3bde7b0a1c564eb88d056a0e28d547c62a19aab558361b69e5f9a6d2b60c9; uid_tt_ss=dbf3bde7b0a1c564eb88d056a0e28d547c62a19aab558361b69e5f9a6d2b60c9; sid_tt=69d21a44a31cd5b1dc976076d81e704a; sessionid=69d21a44a31cd5b1dc976076d81e704a; sessionid_ss=69d21a44a31cd5b1dc976076d81e704a; sid_ucp_v1=1.0.0-KDFlZDMzNGI4ODMwZjBlMjg5YWZhYTY3OTkxZjQyYzI1MjU0ZjcwOTUKHwiFiKne8O7K32QQkLm3sgYYswsgDDCf1_ylBjgIQBIQAxoGbWFsaXZhIiA2OWQyMWE0NGEzMWNkNWIxZGM5NzYwNzZkODFlNzA0YQ; ssid_ucp_v1=1.0.0-KDFlZDMzNGI4ODMwZjBlMjg5YWZhYTY3OTkxZjQyYzI1MjU0ZjcwOTUKHwiFiKne8O7K32QQkLm3sgYYswsgDDCf1_ylBjgIQBIQAxoGbWFsaXZhIiA2OWQyMWE0NGEzMWNkNWIxZGM5NzYwNzZkODFlNzA0YQ; store-idc=alisg; store-country-code=vn; tt-target-idc=alisg; tt-target-idc-sign=ejjVg9BWPNJ6nQ2BIWdcYCfXqOz30qZewoVpb52ceLkgbsD_xSX6VNGo-ey7HNbCWI9Q3puPCHlbd0ZmOs6AaNsmmS5G4GiZOVwVBaFGPkk6HtAfUJUf3gfCkjljfe2in2nZOx2tWQOMRbS5oaDIcbApbG3cWfR1IrxDjuKrlpQkNQQzOVcEcXostAFQgw3H5K3fgs8Sa5Amck2aHfeKwIMU_K5zb28j2crswIz_Ag0qpscocKBPYZEI7EcUJe-FkcamaO1MCdzMMqqCtILvOHHhubL4sGHkP7AyiQI4bR3AtEPUHUra9nDXX3eqDjvrSNAah5dxg6HK4jIbmODoeUrmPYaBSLDuEXubYSV0kS09SyhPBwHKp1h17qQVsNJIXcds9TCxCv814m8u5OfuAglFRVS3eS_5_jvliI12VwGjZUcxPSgJ7cKcu1uIJ20mYQsCV7-45wasfMrEYjEDigKxNw-9n8KOuFyerIBpsTvtvlQ8dCn7bDUqbdDQJS53; ttwid=1%7CDqVNzvDmFpRSVpbi2AgEsjv554Brh5PUeKQMwsKC28w%7C1716380800%7Cda35cc22059638db2ebdc72c202abd1f0c7ea5f1326253a24814e4e482c5c1d6; odin_tt=c0581e8d5cf516210955dc04ad964ed628f5913bbef9b22c4991ff80d67acd8c7f2c5d84faee80576bdf3848ebd4586f8bcd54e83ac268469aca55ca9a0c0a06decd1bc33291fc51cc2e705f6676fd38; msToken=nW1_e89H3ZD9k8L6BUY-Atq5FIX2hc-v0c0jB_p7dwtwT_1y2zGq6EhCKym5E_zwzcSFnacJCq9_QQO1gtRxV0bPhvA7BH_Yhj2mG_V3Wd3A9a5y4qJsaZ_vOaR0NqIIbWKIsQ==; bm_sv=1F2298157235FF279FDCEE7FE5A00A62~YAAQV/rSF+ZcKKCPAQAAKNNLoBcvTnkd00bQF+v8GG6tTiNMFS0xRTOx16rtk64vtVPpEYWr9CTgeBLHWjS3W5Cej13T5HCAXST8fSK0oYmzMJ50SZjAZ6ovIhzNHpSBFLXiB4Yqoq5yO8fS5v6WYM+CoeBVPA+OrN0pkcmvx4EBFbYFNH2VrsCfe/EmAoLZ6jvRK5EYplwKMEyHU7Bm/sEn9jv12E2Gvt4i1RIVHCZE5VAEibh0kSKZSnDEf35PkA==~1";
-                    //    string test1 = "7259568914643436549";
-                    //    string test2 = "TDSQfiIjclZXZzJiOiIXZ2V2ciwiIwMjM4YnbhVHeiojIyV2c1Jye";
-                    //    await tiktokService.testChromeTiktok(test, test1, test2);
-                    //});
-
+                    Task.Run(() => testChromeFacebook(e.RowIndex));
                 }
             }
         }
@@ -373,13 +359,15 @@ namespace TDS
             {
                 fieldsColumn.DefaultCellStyle.NullValue = Common.lstFieldsFacebook[0];
             }
-            List<Account> lstAccount = AccountManager.ReadAccountsFromFile(@"D:\Project\TDSS\file\Account.xml");
+            string xmlFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "file", "Account.xml");
+
+            List<Account> lstAccount = AccountManager.ReadAccountsFromFile(xmlFilePath);
             foreach (Account account in lstAccount)
             {
                 object[] data =
                 {
-                    account.Name,
-                    account.Accesstocken,
+                    account.NameAcc,
+                    account.AccessToken,
                     account.Idacc,
                     account.Cookie
                 };
@@ -414,7 +402,7 @@ namespace TDS
                     Size = new Size(listViewWidth, listViewHeight),
                     Location = new Point(startX + (i % 3) * (listViewWidth + spacingX),
                                          startY + (i / 3) * (listViewHeight + spacingY + textBoxHeight)),
-                    View = View.Details 
+                    View = View.Details
                 };
                 listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
                 listView.Columns.Add("", listViewWidth - 4);
